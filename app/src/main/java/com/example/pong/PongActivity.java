@@ -1,14 +1,38 @@
 package com.example.pong;
 
-import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.app.Activity;
+import android.graphics.Point;
+import android.view.Display;
+import android.view.SurfaceHolder;
 
-public class PongActivity extends AppCompatActivity {
+public class PongActivity extends Activity {
+
+    private PongGame mPongGame;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+
+        mPongGame = new PongGame(this, size.x, size.y);
+        setContentView(mPongGame);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 }
