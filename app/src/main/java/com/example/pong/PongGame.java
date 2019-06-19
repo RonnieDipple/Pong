@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -112,7 +113,7 @@ class PongGame extends SurfaceView implements Runnable {
         // mPlaying must be true AND
         // the thread running for the main
         // loop to execute
-        while (mPlaying){
+        while (mPlaying) {
 
             // What time is it now at the of the loop?
             long frameStartTime = System.currentTimeMillis();
@@ -120,7 +121,7 @@ class PongGame extends SurfaceView implements Runnable {
             // Provided the game isn't paused
             // call the update method
 
-            if(!mPaused){
+            if (!mPaused) {
                 update();
                 // Now the bat and ball are in
                 // their new positions
@@ -140,25 +141,25 @@ class PongGame extends SurfaceView implements Runnable {
             // Make sure timeThisFrame is at least 1 millisecond
             // because accidentally dividing
             // by zero crashes the game
-            if (timeThisFrame > 0){
+            if (timeThisFrame > 0) {
                 // Store the current frame rate in mFPS
                 // ready to pass to the update methods of
                 // mBat and mBall new frame/loop
 
-                mFPS = MILLIS_IN_SECOND/timeThisFrame;
+                mFPS = MILLIS_IN_SECOND / timeThisFrame;
             }
 
 
         }
     }
 
-    private void update(){
+    private void update() {
         // Update the bat and the ball
         mBall.update(mFPS);
         mBat.update(mFPS);
     }
 
-    private void detectCollisions (){
+    private void detectCollisions() {
         // Has the bat hit the ball?
 
         // Has the ball hit the edge of the screen?
@@ -223,15 +224,15 @@ class PongGame extends SurfaceView implements Runnable {
     // This method is called by PongActivity
     // when the player quits the game
 
-    public void pause(){
+    public void pause() {
         // Set mPlaying to false
         // Stopping the thread isn't
         // always instant
         mPlaying = false;
-        try{
+        try {
             // Stop the thread
             mGameThread.join();
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             Log.e("ERROR: ", "joining thread");
         }
 
@@ -239,13 +240,51 @@ class PongGame extends SurfaceView implements Runnable {
 
     // This method is called by PongActivity
     // when the player starts the game
-    public void resume (){
+    public void resume() {
         mPlaying = true;
         // Initialize the instance of Thread
         mGameThread = new Thread(this);
 
         // Start the thread
         mGameThread.start();
+    }
+
+    // Handle all the screen touches
+    @Override
+    public boolean onTouchEvent(MotionEvent motionEvent) {
+        // This switch block replaces the
+        // if statement from the Sub Hunter game
+        switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
+
+            // The player has put their finger on screen
+            case MotionEvent.ACTION_DOWN:
+                // If the game was paused unpause
+                mPaused = false;
+
+                // Where did the touch happen
+                if (motionEvent.getX() > mScreenX / 2) {
+                    // On the right hand side
+
+                    mBat.setMovementState(mBat.RIGHT);
+                } else {
+                    // On the left hand side
+                    mBat.setMovementState(mBat.LEFT);
+                }
+                break;
+            // The player lifted their finger
+            // from anywhere on screen.
+            // It is possible to create bugs by using
+            // multiple fingers. We will use more
+            // complicated and robust touch handling
+            // in later projects
+            case MotionEvent.ACTION_UP:
+                // Stop the bat moving
+                mBat.setMovementState(mBat.STOPPED);
+                break;
+
+        }
+
+        return true;
     }
 
 
